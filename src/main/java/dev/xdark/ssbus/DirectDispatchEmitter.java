@@ -59,7 +59,7 @@ final class DirectDispatchEmitter implements DispatchEmitter {
   @Override
   public int emitCode(String dispatcher, MethodVisitor visitor) {
     Object handle = this.handle;
-    int opcode = handle == null ? INVOKESTATIC : INVOKEVIRTUAL;
+    int opcode = handle == null ? INVOKESTATIC : INVOKESPECIAL;
     String owner = this.owner;
     int index = 0;
     if (handle != null) {

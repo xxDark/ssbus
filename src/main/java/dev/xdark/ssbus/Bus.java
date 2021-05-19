@@ -1,11 +1,9 @@
 package dev.xdark.ssbus;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Bus<E> {
+public class Bus<E> implements BusRegistration<E> {
 
   private static final RegisteredListener NOOP_REGISTERED_LISTENER =
       new RegisteredListener() {
@@ -15,7 +13,7 @@ public class Bus<E> {
   private static final Dispatcher NOOP_DISPATCHER =
       new Dispatcher() {
         @Override
-        public void dispatch(Object event) {}
+        public final void dispatch(Object event) {}
       };
   private static final Comparator<DispatchInfo> INFO_COMPARATOR =
       (o1, o2) -> o2.priority - o1.priority;
@@ -63,8 +61,15 @@ public class Bus<E> {
     }
   }
 
+  public final void configure(Consumer<BusRegistration<E>> registrator) {
+    BusRegistration<E> registration = new SnapshotBusRegistration<>(this);
+    registrator.accept(registration);
+    registration.bake();
+  }
+
+  @Override
   public final RegisteredListener register(Consumer<E> listener, int priority) {
-    DispatchInfo info = new DispatchInfo(DispatchEmitter.forConsumer(listener), priority);
+    DispatchInfo info = Util.createDispatchInfo(listener, priority);
     List<DispatchInfo> infos = this.infos;
     infos.add(info);
     infos.sort(INFO_COMPARATOR);
@@ -72,28 +77,37 @@ public class Bus<E> {
     return new HandleRegisteredListener(this, Collections.singletonList(info));
   }
 
+  @Override
   public final RegisteredListener register(Object handle) {
-    Class<?> owner = unmaskOwner(handle);
     List<DispatchInfo> infos = this.infos;
-    Object mask = maskHandle(handle);
-    List<DispatchInfo> registered = null;
-    for (Method m : owner.getDeclaredMethods()) {
-      Listener anno = m.getDeclaredAnnotation(Listener.class);
-      if (anno == null) continue;
-      boolean virtual = !Modifier.isStatic(m.getModifiers());
-      if (virtual == (handle == owner)) {
-        continue;
-      }
-      DispatchInfo info = new DispatchInfo(DispatchEmitter.forDirect(mask, m), anno.priority());
-      infos.add(info);
-      registered = addInfo(registered, info);
-    }
-    if (registered != null) {
+    int j = infos.size();
+    Util.scan(infos, handle);
+    int k = infos.size();
+    if (j != k) {
+      List<DispatchInfo> registered = new ArrayList<>(infos.subList(j, k));
       infos.sort(INFO_COMPARATOR);
       dispatcher = DispatcherGenerator.generateDispatcher(host, internalName, infos);
       return new HandleRegisteredListener(this, registered);
     }
     return NOOP_REGISTERED_LISTENER;
+  }
+
+  @Override
+  public void bake() {
+    List<DispatchInfo> infos = this.infos;
+    if (infos.isEmpty()) {
+      dispatcher = NOOP_DISPATCHER;
+    } else {
+      dispatcher = DispatcherGenerator.generateDispatcher(host, internalName, infos);
+    }
+  }
+
+  void register(DispatchInfo infos) {
+    this.infos.add(infos);
+  }
+
+  void registerAll(Collection<DispatchInfo> infos) {
+    this.infos.addAll(infos);
   }
 
   void unregister(Collection<DispatchInfo> infos) {
@@ -109,17 +123,6 @@ public class Bus<E> {
   }
 
   protected void exceptionCaught(Throwable t) {}
-
-  private static Object maskHandle(Object handle) {
-    return handle instanceof Class ? null : handle;
-  }
-
-  private static Class<?> unmaskOwner(Object handle) {
-    if (handle instanceof Class) {
-      return (Class<?>) handle;
-    }
-    return handle.getClass();
-  }
 
   private static List<DispatchInfo> addInfo(List<DispatchInfo> infos, DispatchInfo info) {
     if (infos == null) {
