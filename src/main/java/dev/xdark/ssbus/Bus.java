@@ -91,10 +91,9 @@ public class Bus<E> {
     if (registered != null) {
       infos.sort(INFO_COMPARATOR);
       dispatcher = DispatcherGenerator.generateDispatcher(host, internalName, infos);
+      return new HandleRegisteredListener(this, registered);
     }
-    return registered == null
-        ? NOOP_REGISTERED_LISTENER
-        : new HandleRegisteredListener(this, registered);
+    return NOOP_REGISTERED_LISTENER;
   }
 
   void unregister(Collection<DispatchInfo> infos) {
