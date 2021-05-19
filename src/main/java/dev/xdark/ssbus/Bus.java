@@ -21,6 +21,7 @@ public class Bus<E> implements BusRegistration<E> {
   private final Class<?> host;
   private final String internalName;
   private Dispatcher<E> dispatcher = NOOP_DISPATCHER;
+  private boolean bakeOnRegistration = true;
 
   public Bus(Class<E> type) {
     this(type, Util.getInternalName(type));
@@ -73,7 +74,9 @@ public class Bus<E> implements BusRegistration<E> {
     List<DispatchInfo> infos = this.infos;
     infos.add(info);
     infos.sort(INFO_COMPARATOR);
-    dispatcher = DispatcherGenerator.generateDispatcher(host, internalName, infos);
+    if (bakeOnRegistration) {
+      dispatcher = DispatcherGenerator.generateDispatcher(host, internalName, infos);
+    }
     return new HandleRegisteredListener(this, Collections.singletonList(info));
   }
 
@@ -86,7 +89,9 @@ public class Bus<E> implements BusRegistration<E> {
     if (j != k) {
       List<DispatchInfo> registered = new ArrayList<>(infos.subList(j, k));
       infos.sort(INFO_COMPARATOR);
-      dispatcher = DispatcherGenerator.generateDispatcher(host, internalName, infos);
+      if (bakeOnRegistration) {
+        dispatcher = DispatcherGenerator.generateDispatcher(host, internalName, infos);
+      }
       return new HandleRegisteredListener(this, registered);
     }
     return NOOP_REGISTERED_LISTENER;
@@ -100,6 +105,14 @@ public class Bus<E> implements BusRegistration<E> {
     } else {
       dispatcher = DispatcherGenerator.generateDispatcher(host, internalName, infos);
     }
+  }
+
+  public void setBakeOnRegistration(boolean bake) {
+    this.bakeOnRegistration = bake;
+  }
+
+  public boolean isBakeOnRegistration() {
+    return this.bakeOnRegistration;
   }
 
   void register(DispatchInfo infos) {
