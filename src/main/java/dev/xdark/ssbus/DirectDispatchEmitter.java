@@ -10,7 +10,7 @@ import static org.objectweb.asm.Opcodes.*;
 
 final class DirectDispatchEmitter implements DispatchEmitter {
 
-  private static final Unsafe UNSAFE = UnsafeUtil.unsafe();
+  private static final Unsafe UNSAFE = Util.unsafe();
   private final Object handle;
   private final String owner;
   private final String name;

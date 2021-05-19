@@ -11,7 +11,7 @@ import static org.objectweb.asm.Opcodes.*;
 
 final class DispatcherGenerator {
 
-  private static final Unsafe UNSAFE = UnsafeUtil.unsafe();
+  private static final Unsafe UNSAFE = Util.unsafe();
 
   static <E> Dispatcher<E> generateDispatcher(
       Class<?> host, String type, List<DispatchInfo> infos) {

@@ -11,7 +11,7 @@ import static org.objectweb.asm.Opcodes.*;
 
 final class ConsumerDispatchEmitter implements DispatchEmitter {
 
-  private static final Unsafe UNSAFE = UnsafeUtil.unsafe();
+  private static final Unsafe UNSAFE = Util.unsafe();
   private final String consumerField = "__consumer__" + Util.nextId();
   private final Consumer<?> consumer;
   private final boolean synthetic;
