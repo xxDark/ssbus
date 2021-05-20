@@ -36,12 +36,12 @@ public class Bus<E> implements BusRegistration<E> {
     this.internalName = internalName;
   }
 
-  public final E unsafeFire(E event) {
+  public final <V extends E> V unsafeFire(V event) {
     dispatcher.dispatch(event);
     return event;
   }
 
-  public final E fire(E event) {
+  public final <V extends E> V fire(V event) {
     try {
       dispatcher.dispatch(event);
     } catch (Throwable t) {
