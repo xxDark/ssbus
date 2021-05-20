@@ -5,7 +5,7 @@ import java.util.List;
 final class HandleRegisteredListener implements RegisteredListener {
 
     private final Bus<?> bus;
-    private final List<DispatchInfo> infos;
+    private List<DispatchInfo> infos;
 
     HandleRegisteredListener(Bus<?> bus, List<DispatchInfo> infos) {
         this.bus = bus;
@@ -14,8 +14,7 @@ final class HandleRegisteredListener implements RegisteredListener {
 
     @Override
     public void unregister() {
-        List<DispatchInfo> infos = this.infos;
         bus.unregister(infos);
-        infos.clear();
+        infos = null;
     }
 }
