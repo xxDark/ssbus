@@ -1,9 +1,10 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 group 'dev.xdark'
-version '1.0'
+version '1.1'
 
 repositories {
     mavenCentral()
@@ -11,4 +12,29 @@ repositories {
 
 dependencies {
     implementation 'org.ow2.asm:asm:9.1'
+}
+
+tasks.withType(JavaCompile)*.options*.compilerArgs << '-parameters'
+
+publishing {
+    repositories {
+        def user = System.getenv 'IMPLARIO_REPO_USER'
+        if (user != null) {
+            maven {
+                url 'https://repo.implario.dev/public/'
+                credentials {
+                    username user
+                    password System.getenv('IMPLARIO_REPO_PASSWORD')
+                }
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version project.version
+            artifact jar
+        }
+    }
 }
