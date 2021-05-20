@@ -18,13 +18,13 @@ final class DispatcherGenerator {
     int i = 0, j = infos.size();
     ClassWriter writer = new ClassWriter(0);
     String name = getClassName();
+    ClassInfo info = new ClassInfo(writer, V1_1, ACC_FINAL, name, "java/lang/Object");
+    info.interfaces.add("dev/xdark/ssbus/Dispatcher");
+    for (; i < j; i++) {
+      infos.get(i).emitter.emitInfo(writer);
+    }
     writer.visit(
-        V1_8,
-        ACC_FINAL,
-        name,
-        null,
-        "java/lang/Object",
-        new String[] {"dev/xdark/ssbus/Dispatcher"});
+        V1_8, ACC_FINAL, name, null, "java/lang/Object", info.interfaces.toArray(new String[0]));
     MethodVisitor init = writer.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
     init.visitCode();
     init.visitVarInsn(ALOAD, 0);
@@ -39,10 +39,8 @@ final class DispatcherGenerator {
     invoke.visitTypeInsn(CHECKCAST, type);
     invoke.visitVarInsn(ASTORE, 1);
     int stackSize = 0;
-    for (; i < j; i++) {
-      DispatchEmitter emitter = infos.get(i).emitter;
-      emitter.emitInfo(writer);
-      stackSize = Math.max(stackSize, emitter.emitCode(name, invoke));
+    for (i = 0; i < j; i++) {
+      stackSize = Math.max(stackSize, infos.get(i).emitter.emitCode(name, invoke));
     }
     invoke.visitInsn(RETURN);
     invoke.visitMaxs(stackSize, 2);

@@ -32,11 +32,9 @@ final class DirectDispatchEmitter implements DispatchEmitter {
 
   @Override
   public void emitInfo(ClassVisitor visitor) {
-    Object handle = this.handle;
     if (handle != null) {
-      String owner = this.owner;
       visitor
-          .visitField(ACC_PRIVATE | ACC_FINAL, handleField, 'L' + owner + ';', null, null)
+          .visitField(ACC_PRIVATE | ACC_FINAL, handleField, "Ljava/lang/Object;", null, null)
           .visitEnd();
     }
   }
@@ -59,12 +57,13 @@ final class DirectDispatchEmitter implements DispatchEmitter {
   @Override
   public int emitCode(String dispatcher, MethodVisitor visitor) {
     Object handle = this.handle;
-    int opcode = handle == null ? INVOKESTATIC : INVOKESPECIAL;
+    int opcode = handle == null ? INVOKESTATIC : INVOKEVIRTUAL;
     String owner = this.owner;
     int index = 0;
     if (handle != null) {
       visitor.visitVarInsn(ALOAD, index++);
-      visitor.visitFieldInsn(GETFIELD, dispatcher, handleField, 'L' + owner + ';');
+      visitor.visitFieldInsn(GETFIELD, dispatcher, handleField, "Ljava/lang/Object;");
+      visitor.visitTypeInsn(CHECKCAST, 'L' + owner + ';');
     }
     visitor.visitVarInsn(ALOAD, 1);
     visitor.visitMethodInsn(opcode, owner, name, descriptor, false);
