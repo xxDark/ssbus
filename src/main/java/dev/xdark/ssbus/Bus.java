@@ -62,10 +62,8 @@ public class Bus<E> implements BusRegistration<E> {
     }
   }
 
-  public final void configure(Consumer<BusRegistration<E>> registrator) {
-    BusRegistration<E> registration = new SnapshotBusRegistration<>(this);
-    registrator.accept(registration);
-    registration.bake();
+  public final BusRegistration<E> newRegistration() {
+    return new DelayedBusRegistration<>(this);
   }
 
   @Override

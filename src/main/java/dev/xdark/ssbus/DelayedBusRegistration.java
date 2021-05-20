@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-final class SnapshotBusRegistration<E> implements BusRegistration<E> {
+final class DelayedBusRegistration<E> implements BusRegistration<E> {
 
   private final Bus<?> bus;
   private boolean dirty;
 
-  SnapshotBusRegistration(Bus<?> bus) {
+  DelayedBusRegistration(Bus<?> bus) {
     this.bus = bus;
   }
 
