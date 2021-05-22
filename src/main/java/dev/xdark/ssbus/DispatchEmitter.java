@@ -20,8 +20,7 @@ interface DispatchEmitter {
         handle,
         m.getDeclaringClass(),
         m.getName(),
-        MethodType.methodType(m.getReturnType(), m.getParameterTypes()).toMethodDescriptorString(),
-        m.isAnnotationPresent(Virtual.class));
+        MethodType.methodType(m.getReturnType(), m.getParameterTypes()).toMethodDescriptorString());
   }
 
   static DispatchEmitter forConsumer(Consumer<?> consumer) {

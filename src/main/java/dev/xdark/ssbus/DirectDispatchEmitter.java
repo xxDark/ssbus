@@ -16,9 +16,8 @@ final class DirectDispatchEmitter implements DispatchEmitter {
   private final String name;
   private final String descriptor;
   private final String handleField;
-  private final boolean virtual;
 
-  DirectDispatchEmitter(Object handle, Class<?> owner, String name, String descriptor, boolean virtual) {
+  DirectDispatchEmitter(Object handle, Class<?> owner, String name, String descriptor) {
     this.handle = handle;
     String $owner = owner.getName();
     this.owner = $owner.replace('.', '/');
@@ -29,7 +28,6 @@ final class DirectDispatchEmitter implements DispatchEmitter {
     } else {
       handleField = null;
     }
-    this.virtual = virtual;
   }
 
   @Override
@@ -59,7 +57,7 @@ final class DirectDispatchEmitter implements DispatchEmitter {
   @Override
   public int emitCode(String dispatcher, MethodVisitor visitor) {
     Object handle = this.handle;
-    int opcode = handle == null ? INVOKESTATIC : (virtual ? INVOKEVIRTUAL : INVOKESPECIAL);
+    int opcode = handle == null ? INVOKESTATIC : INVOKESPECIAL;
     String owner = this.owner;
     int index = 0;
     if (handle != null) {
