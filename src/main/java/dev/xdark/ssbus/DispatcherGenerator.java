@@ -18,17 +18,18 @@ final class DispatcherGenerator {
     int i = 0, j = infos.size();
     ClassWriter writer = new ClassWriter(0);
     String name = getClassName();
-    ClassInfo info = new ClassInfo(writer, V1_1, ACC_FINAL, name, "java/lang/Object");
+    ClassInfo info = new ClassInfo(writer, V1_1, ACC_FINAL, name, Util.BRIDGE_NAME);
     info.interfaces.add("dev/xdark/ssbus/Dispatcher");
     for (; i < j; i++) {
       infos.get(i).emitter.emitInfo(writer);
     }
+    String superName = info.superName;
     writer.visit(
-        V1_8, ACC_FINAL, name, null, "java/lang/Object", info.interfaces.toArray(new String[0]));
+        V1_8, ACC_FINAL, name, null, superName, info.interfaces.toArray(new String[0]));
     MethodVisitor init = writer.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
     init.visitCode();
     init.visitVarInsn(ALOAD, 0);
-    init.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+    init.visitMethodInsn(INVOKESPECIAL, superName, "<init>", "()V", false);
     init.visitInsn(RETURN);
     init.visitMaxs(1, 1);
     init.visitEnd();

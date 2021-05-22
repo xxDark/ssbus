@@ -23,10 +23,15 @@ public class Bus<E> implements BusRegistration<E> {
   private Dispatcher<E> dispatcher = NOOP_DISPATCHER;
   private boolean bakeOnRegistration = true;
 
+  /** @param type type of the event */
   public Bus(Class<E> type) {
     this(type, Util.getInternalName(type));
   }
 
+  /**
+   * @param host host class that will be used for dispatcher
+   * @param type type of the event.
+   */
   public Bus(Class<?> host, Class<E> type) {
     this(host, Util.getInternalName(type));
   }
@@ -36,11 +41,21 @@ public class Bus<E> implements BusRegistration<E> {
     this.internalName = internalName;
   }
 
+  /**
+   * Fires an event without calling {@link Bus#exceptionCaught(Throwable)} if exception occurs
+   *
+   * @param event event to fire
+   */
   public final <V extends E> V unsafeFire(V event) {
     dispatcher.dispatch(event);
     return event;
   }
 
+  /**
+   * Fires an event
+   *
+   * @param event event to fire
+   */
   public final <V extends E> V fire(V event) {
     try {
       dispatcher.dispatch(event);
@@ -50,10 +65,20 @@ public class Bus<E> implements BusRegistration<E> {
     return event;
   }
 
+  /**
+   * Fires an event without calling {@link Bus#exceptionCaught(Throwable)} if exception occurs
+   *
+   * @param event event to fire
+   */
   public final void unsafeFireAndForget(E event) {
     dispatcher.dispatch(event);
   }
 
+  /**
+   * Fires an event
+   *
+   * @param event event to fire
+   */
   public final void fireAndForget(E event) {
     try {
       dispatcher.dispatch(event);
@@ -62,6 +87,12 @@ public class Bus<E> implements BusRegistration<E> {
     }
   }
 
+  /**
+   * Returns new {@link BusRegistration} that may be used to generate multiple event handlers at
+   * once
+   *
+   * @see Bus#setBakeOnRegistration(boolean)
+   */
   public final BusRegistration<E> newRegistration() {
     return new DelayedBusRegistration<>(this);
   }
@@ -105,10 +136,14 @@ public class Bus<E> implements BusRegistration<E> {
     }
   }
 
+  /** Sets whether the dispatcher must be automatically baked on each handler (un)registration */
   public void setBakeOnRegistration(boolean bake) {
     this.bakeOnRegistration = bake;
   }
 
+  /**
+   * @return {@code true} if the bus must be automatically baked on each handler (un)registration
+   */
   public boolean isBakeOnRegistration() {
     return this.bakeOnRegistration;
   }
@@ -133,13 +168,9 @@ public class Bus<E> implements BusRegistration<E> {
     }
   }
 
+  /**
+   * Called whether exception occurs on event dispatching
+   * Note that this method will NOT be called when unsafe methods are used
+   */
   protected void exceptionCaught(Throwable t) {}
-
-  private static List<DispatchInfo> addInfo(List<DispatchInfo> infos, DispatchInfo info) {
-    if (infos == null) {
-      infos = new ArrayList<>();
-    }
-    infos.add(info);
-    return infos;
-  }
 }

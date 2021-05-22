@@ -11,7 +11,7 @@ final class ClassInfo {
   final ClassVisitor cv;
   final int version;
   final String name;
-  final String superName;
+  String superName;
   int access;
 
   ClassInfo(ClassVisitor cv, int version, int access, String name, String superName) {
