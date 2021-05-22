@@ -40,4 +40,6 @@ public class HelloBusTest {
 }
 ```
 
-If someone is able to provide better JMH benchmarks, I will appreciate that.
+**TODO**:
+* **JMH Benchmarks**
+* **Java 9+ support**
